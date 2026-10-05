@@ -20,6 +20,7 @@ def test_text_file_named_jpg_raises_unidentified_image_error(tmp_path):
     with pytest.raises(UnidentifiedImageError):
         model.single_image_detection(str(fake_photo))
 
+
 def test_tiny_image_runs_without_detections(tmp_path):
     tiny_photo = tmp_path / "tiny.jpg"
     Image.new("RGB", (1, 1)).save(tiny_photo)
@@ -36,6 +37,7 @@ def test_tiny_image_runs_without_detections(tmp_path):
 def test_model_can_be_created_with_default_version():
     model = pw_detection.MegaDetectorV6()
     assert model is not None
+
 
 def test_truncated_photo_is_processed_without_error(tmp_path):
     # Characterization test: documents current behavior, not necessarily
