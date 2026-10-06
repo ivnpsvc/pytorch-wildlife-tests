@@ -25,6 +25,8 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported |
 | F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported |
 | F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported |
+| F11 | `detection_folder_separation` fails with `SameFileError` on JSON with absolute paths (the default) | Bug | Not reported |
+| F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported |
 | L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
@@ -158,6 +160,30 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Question for maintainers:** should a batch skip unreadable files and report them, rather than
   fail entirely?
 - **Test:** planned in `test_batch.py` (characterization test).
+
+## F11: Folder separation fails on absolute paths
+
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** `save_detection_json` writes absolute paths by default (`img_id` is the full path).
+  Passing that JSON to `detection_folder_separation` raises `shutil.SameFileError` on the first photo,
+  and no photos are sorted.
+- **Cause:** the destination is built as `os.path.join(target_folder, os.path.dirname(img_id))`.
+  When `img_id` is absolute, `os.path.join` discards `target_folder` and returns the photo's own
+  folder, so the photo is copied onto itself.
+- **Works when:** the JSON is saved with `exclude_file_path=<photo folder>`, so `img_id` is relative.
+- **Impact:** the default pipeline (detect a folder, save JSON, sort photos) fails at the last step.
+- **Test:** planned in `test_post_process.py` (xfail, strict).
+
+## F12: Empty string for `max_detection_conf` in Timelapse JSON
+
+- **Category:** Question. **Status:** Not reported.
+- **What happens:** in `save_detection_timelapse_json`, photos without detections get
+  `"max_detection_conf": ""`, while other photos get a number.
+- **Cause:** `float(max(confidence_list)) if len(confidence_list) > 0 else ''`.
+- **Question:** tools reading the file may expect a number (for example `0.0`). Is `""` what
+  Timelapse expects?
+- **Related observation:** the default `info` is `{"detector": "megadetector_v5"}`, also when the
+  results come from MegaDetector V6.
 
 ## L1–L4: Model limitations
 
