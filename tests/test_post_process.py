@@ -54,6 +54,56 @@ def test_exclude_file_path_makes_paths_relative(results, tmp_path, images_dir):
     assert names == JSON_PHOTOS
 
 
+def save_and_load_timelapse(results, path):
+    post_process.save_detection_timelapse_json(
+        results, str(path), categories=MegaDetectorV6.CLASS_NAMES
+    )
+    return json.loads(path.read_text())
+
+
+def test_timelapse_json_has_info_categories_and_images(results, tmp_path):
+    saved = save_and_load_timelapse(results, tmp_path / "timelapse.json")
+    assert set(saved) == {"info", "detection_categories", "images"}
+    assert len(saved["images"]) == len(JSON_PHOTOS)
+
+
+def test_timelapse_bbox_is_x_y_width_height(results, tmp_path):
+    saved = save_and_load_timelapse(results, tmp_path / "timelapse.json")
+    for result, image in zip(results, saved["images"]):
+        for coords, detection in zip(result["normalized_coords"], image["detections"]):
+            x1, y1, x2, y2 = coords
+            assert detection["bbox"] == pytest.approx([x1, y1, x2 - x1, y2 - y1])
+
+
+def test_timelapse_categories_match_detection_categories(results, tmp_path):
+    saved = save_and_load_timelapse(results, tmp_path / "timelapse.json")
+    for result, image in zip(results, saved["images"]):
+        categories = [detection["category"] for detection in image["detections"]]
+        assert categories == [str(c) for c in result["detections"].class_id]
+        for category in categories:
+            assert category in saved["detection_categories"]
+
+
+def test_timelapse_max_detection_conf_is_the_highest_confidence(results, tmp_path):
+    saved = save_and_load_timelapse(results, tmp_path / "timelapse.json")
+    for result, image in zip(results, saved["images"]):
+        confidences = result["detections"].confidence
+        if len(confidences) > 0:
+            assert image["max_detection_conf"] == pytest.approx(max(confidences))
+
+
+def test_timelapse_max_detection_conf_is_empty_string_without_detections(
+    results, tmp_path
+):
+    # Characterization test (F12): documents current behavior, not necessarily
+    # correct behavior. Photos without detections get "" instead of a number.
+    # Open question for the maintainers: is this what Timelapse expects?
+    saved = save_and_load_timelapse(results, tmp_path / "timelapse.json")
+    empty = JSON_PHOTOS.index("empty_night.jpg")
+    assert saved["images"][empty]["detections"] == []
+    assert saved["images"][empty]["max_detection_conf"] == ""
+
+
 @pytest.fixture
 def source_folder(tmp_path, images_dir):
     folder = tmp_path / "photos"
