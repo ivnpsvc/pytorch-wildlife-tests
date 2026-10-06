@@ -2,7 +2,6 @@ import pytest
 
 ANIMAL = 0
 PERSON = 1
-THRESHOLD = 0.2
 
 
 @pytest.mark.parametrize(
@@ -20,10 +19,8 @@ THRESHOLD = 0.2
         ("person_day.jpg", PERSON),
     ],
 )
-def test_photo_has_expected_detection(detector, images_dir, photo, expected_class):
-    result = detector.single_image_detection(
-        str(images_dir / photo), det_conf_thres=THRESHOLD
-    )
+def test_photo_has_expected_detection(detect, photo, expected_class):
+    result = detect(photo)
     assert expected_class in result["detections"].class_id
 
 
@@ -36,8 +33,6 @@ def test_photo_has_expected_detection(detector, images_dir, photo, expected_clas
         "empty_vegetation_in_front.jpg",
     ],
 )
-def test_empty_photo_has_no_detections(detector, images_dir, photo):
-    result = detector.single_image_detection(
-        str(images_dir / photo), det_conf_thres=THRESHOLD
-    )
+def test_empty_photo_has_no_detections(detect, photo):
+    result = detect(photo)
     assert len(result["detections"]) == 0
