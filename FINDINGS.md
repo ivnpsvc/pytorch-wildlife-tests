@@ -53,7 +53,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 
   ```python
   url = "https://zenodo.org/records/15398270/files/MDV6-yolov9-c.pt?download=1"
-  self.MODEL_NAME = "MDV6b-yolov9-c.pt"   # extra "b": never matches the download
+  self.MODEL_NAME = "MDV6b-yolov9-c.pt"  # extra "b": never matches the download
   ```
 
   The same mismatch exists for `MDV6-rtdetr-c` (`MDV6-rtdetr-c.pt` vs `MDV6b-rtdetr-c.pt`).
