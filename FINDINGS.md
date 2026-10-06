@@ -28,6 +28,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F11 | `detection_folder_separation` fails with `SameFileError` on JSON with absolute paths (the default) | Bug | Not reported |
 | F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported |
 | F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported |
+| F14 | `overwrite=True` empties the whole output folder, including files the library did not create | Question | Not reported |
 | L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
@@ -196,6 +197,20 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Impact:** small in practice (an exact match is rare), but the same number means two different
   things in two steps of one pipeline.
 - **Test:** planned in `test_post_process.py` (characterization test).
+
+## F14: `overwrite=True` empties the whole output folder
+
+- **Category:** Question. **Status:** Not reported.
+- **What happens:** `save_detection_images`, `save_detection_images_dots` and `save_crop_images`
+  with `overwrite=True` delete everything in the output folder before saving, including files the
+  library did not create. In a test, a `notes.txt` in the output folder was deleted.
+- **Cause:** the functions use `supervision.ImageSink(target_dir_path=output_dir, overwrite=overwrite)`,
+  which removes the folder's contents when `overwrite=True`.
+- **Risk:** the docstring says "Whether overwriting existing image folders". A user who points
+  `output_dir` at a folder with other data, or at the photo folder itself, can lose files.
+- **Question for maintainers:** is deleting unrelated files intended? A warning in the docstring,
+  or overwriting only the files being written, would be safer.
+- **Test:** `test_overwrite_true_deletes_everything_in_the_output_folder` (characterization test).
 
 ## L1–L4: Model limitations
 
