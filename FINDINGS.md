@@ -27,6 +27,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported |
 | F11 | `detection_folder_separation` fails with `SameFileError` on JSON with absolute paths (the default) | Bug | Not reported |
 | F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported |
+| F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported |
 | L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
@@ -184,6 +185,17 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
   Timelapse expects?
 - **Related observation:** the default `info` is `{"detector": "megadetector_v5"}`, also when the
   results come from MegaDetector V6.
+
+## F13: Threshold boundary differs between detection and folder separation
+
+- **Category:** Question. **Status:** Not reported.
+- **What happens:** detection keeps detections with confidence **at or above** the threshold
+  (`det_conf_thres`), but `detection_folder_separation` sorts a photo into `Animal/` only when the
+  confidence is **above** the threshold (`confidence > confidence_threshold`). An animal with
+  confidence exactly 0.2 is detected at threshold 0.2, but sorted into `No_animal/` at threshold 0.2.
+- **Impact:** small in practice (an exact match is rare), but the same number means two different
+  things in two steps of one pipeline.
+- **Test:** planned in `test_post_process.py` (characterization test).
 
 ## L1–L4: Model limitations
 
