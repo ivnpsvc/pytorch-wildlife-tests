@@ -13,6 +13,7 @@ def images_dir():
 def detector():
     return pw_detection.MegaDetectorV6(version="MDV6-yolov9-c")
 
+
 @pytest.fixture(scope="session")
 def detection_threshold():
     return 0.2

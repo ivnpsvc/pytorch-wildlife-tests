@@ -19,6 +19,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
+            - name: Check code style
+        run: |
+          ruff check .
+          ruff format --check .
+
       - name: Download model weights
         # Workaround: PytorchWildlife 1.3.0 checks the cache for
         # MDV6b-yolov9-c.pt, but downloads MDV6-yolov9-c.pt, so it
