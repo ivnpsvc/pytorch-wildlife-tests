@@ -1,7 +1,6 @@
 import pytest
 
-ANIMAL = 0
-PERSON = 1
+from constants import ANIMAL, PERSON
 
 
 @pytest.mark.parametrize(

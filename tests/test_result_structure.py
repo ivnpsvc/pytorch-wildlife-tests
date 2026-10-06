@@ -2,6 +2,9 @@ from pathlib import Path
 
 import pytest
 from PIL import Image
+from PytorchWildlife.models.detection import MegaDetectorV6
+
+from constants import ANIMAL, PERSON, VEHICLE
 
 PHOTOS = sorted(
     photo.name for photo in (Path(__file__).parent.parent / "images").glob("*.jpg")
@@ -44,3 +47,11 @@ def test_normalized_coords_are_between_0_and_1(detect, photo):
     for box in result["normalized_coords"]:
         for value in box:
             assert 0 <= value <= 1
+
+
+def test_class_ids_match_the_library():
+    assert MegaDetectorV6.CLASS_NAMES == {
+        ANIMAL: "animal",
+        PERSON: "person",
+        VEHICLE: "vehicle",
+    }

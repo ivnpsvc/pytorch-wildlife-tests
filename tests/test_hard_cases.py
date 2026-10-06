@@ -1,8 +1,6 @@
 import pytest
 
-ANIMAL = 0
-PERSON = 1
-VEHICLE = 2
+from constants import ANIMAL, PERSON, VEHICLE
 
 
 def test_three_cats_photo_has_at_least_three_animals(detect):
