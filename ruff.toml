@@ -1,0 +1,3 @@
+# Where our own modules live, so Ruff can tell them apart from installed
+# packages when sorting imports (for example tests/constants.py).
+src = [".", "tests"]
