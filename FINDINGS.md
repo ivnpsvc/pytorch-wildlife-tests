@@ -23,6 +23,8 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify |
 | F7 | RT-DETR version may use the wrong predictor | Bug | To verify |
 | F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported |
+| F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported |
+| F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported |
 | L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
@@ -116,6 +118,46 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Question for maintainers:** is this intended (to keep batch runs going)? If so, could truncated
   files at least be reported?
 - **Test:** `test_truncated_photo_is_processed_without_error` (characterization test).
+
+## F9: Single-image detection uses swapped color channels
+
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** the same photo gives different results with `single_image_detection` and
+  `batch_image_detection`:
+
+  | Photo | Single (path) | Batch (folder) |
+  |---|---|---|
+  | `coyote_day.jpg` | animal 0.594, 0.418 | animal 0.504, 0.422 |
+  | `animal_bird_day.jpg` | animal 0.864 | animal 0.880 |
+  | `person_day.jpg` | person 0.906 | person 0.912 |
+  | `animal_small_distant_day.jpg` | animal 0.404 | **no detection** |
+  | `deer_night.jpg` (grayscale) | animal 0.703 | animal 0.703 |
+
+- **Cause:** `single_image_detection` loads the image with
+  `np.array(Image.open(img_path).convert("RGB"))` and passes the array to Ultralytics, which treats
+  NumPy arrays as BGR (OpenCV convention). The red and blue channels are swapped. Batch detection
+  from a folder passes file paths, which Ultralytics loads itself in the correct order.
+- **Evidence:** single detection on a path gives the same result as an RGB array; batch detection
+  gives the same result as a BGR array (`cv2.imread`). Grayscale night photos are identical in both,
+  because their three channels are equal.
+- **Also affected:** `batch_image_detection` with a list of arrays. Its docstring says
+  "RGB format", but the arrays are treated as BGR.
+- **Impact:** single-image results are computed on color-swapped photos. A researcher testing one
+  photo and then running a folder can get different answers for the same photo.
+- **Note for this suite:** known-answer tests use single detection, so they run on swapped colors.
+  `animal_small_distant_day.jpg` is only found with swapped colors.
+- **Test:** planned in `test_batch.py` (xfail, strict).
+
+## F10: One non-image `.jpg` stops the whole batch
+
+- **Category:** Question. **Status:** Not reported.
+- **What happens:** a folder with valid photos and one text file named `fake.jpg` raises
+  `UnidentifiedImageError`, and no results are returned for any photo.
+- **Contrast:** truncated photos (F8) are processed silently. One kind of broken file stops the
+  batch, the other is hidden.
+- **Question for maintainers:** should a batch skip unreadable files and report them, rather than
+  fail entirely?
+- **Test:** planned in `test_batch.py` (characterization test).
 
 ## L1–L4: Model limitations
 
