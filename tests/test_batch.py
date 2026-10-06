@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 BATCH_PHOTOS = ["coyote_day.jpg", "empty_night.jpg", "person_day.jpg"]
 
@@ -64,3 +64,28 @@ def test_batch_with_arrays_uses_position_as_img_id(detector, images_dir):
     ]
     results = detector.batch_image_detection(arrays)
     assert [result["img_id"] for result in results] == ["0", "1", "2"]
+
+
+@pytest.mark.xfail(
+    raises=AssertionError,
+    strict=True,
+    reason="Known bug in 1.3.0 (F9): single-image detection swaps red and blue",
+)
+def test_batch_and_single_detection_give_same_results(detector, photo_folder):
+    batch_results = by_photo(detector.batch_image_detection(str(photo_folder)))
+    for photo in BATCH_PHOTOS:
+        single = detector.single_image_detection(str(photo_folder / photo))
+        in_batch = batch_results[photo]["detections"]
+        alone = single["detections"]
+        assert list(alone.class_id) == list(in_batch.class_id)
+        assert alone.confidence == pytest.approx(in_batch.confidence, abs=0.01)
+
+
+def test_one_non_image_jpg_stops_the_whole_batch(detector, photo_folder):
+    # Characterization test (F10): documents current behavior, not necessarily
+    # correct behavior. One unreadable file makes the whole batch fail, and no
+    # results are returned for the valid photos.
+    # Open question for the maintainers: should the batch skip and report it?
+    (photo_folder / "fake.jpg").write_text("hello, I am not a picture")
+    with pytest.raises(UnidentifiedImageError):
+        detector.batch_image_detection(str(photo_folder))

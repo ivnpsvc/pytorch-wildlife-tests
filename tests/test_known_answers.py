@@ -14,6 +14,7 @@ from constants import ANIMAL, PERSON
         ("animal_squirrel_day.jpg", ANIMAL),
         ("animal_mountain_lion_night.jpg", ANIMAL),
         ("animal_deer_low_resolution.jpg", ANIMAL),
+        # Only found with swapped colors; see F9 in FINDINGS.md
         ("animal_small_distant_day.jpg", ANIMAL),
         ("person_day.jpg", PERSON),
     ],
