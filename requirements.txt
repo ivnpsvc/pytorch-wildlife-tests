@@ -9,6 +9,7 @@ setuptools<82
 
 # Test framework
 pytest
+pytest-cov
 
 # Linting and formatting
 ruff==0.16.10
