@@ -1,19 +1,43 @@
+import pytest
+
 ANIMAL = 0
+PERSON = 1
 THRESHOLD = 0.2
 
 
-def test_photo_with_animal_has_animal_detection(detector, images_dir):
+@pytest.mark.parametrize(
+    "photo, expected_class",
+    [
+        ("coyote_day.jpg", ANIMAL),
+        ("deer_night.jpg", ANIMAL),
+        ("raccoon_partial_night.jpg", ANIMAL),
+        ("animals_three_cats_day.jpg", ANIMAL),
+        ("animal_bird_day.jpg", ANIMAL),
+        ("animal_squirrel_day.jpg", ANIMAL),
+        ("animal_mountain_lion_night.jpg", ANIMAL),
+        ("animal_deer_low_resolution.jpg", ANIMAL),
+        ("animal_small_distant_day.jpg", ANIMAL),
+        ("person_day.jpg", PERSON),
+    ],
+)
+def test_photo_has_expected_detection(detector, images_dir, photo, expected_class):
     result = detector.single_image_detection(
-        str(images_dir / "coyote_day.jpg"), det_conf_thres=THRESHOLD
+        str(images_dir / photo), det_conf_thres=THRESHOLD
     )
-    detections = result["detections"]
-    assert len(detections) >= 1
-    assert ANIMAL in detections.class_id
+    assert expected_class in result["detections"].class_id
 
 
-def test_empty_photo_has_no_detections(detector, images_dir):
+@pytest.mark.parametrize(
+    "photo",
+    [
+        "empty_fence_day.jpg",
+        "empty_hillside_day.jpg",
+        "empty_night.jpg",
+        "empty_vegetation_in_front.jpg",
+    ],
+)
+def test_empty_photo_has_no_detections(detector, images_dir, photo):
     result = detector.single_image_detection(
-        str(images_dir / "empty_fence_day.jpg"), det_conf_thres=THRESHOLD
+        str(images_dir / photo), det_conf_thres=THRESHOLD
     )
-    detections = result["detections"]
-    assert len(detections) == 0
+    assert len(result["detections"]) == 0
