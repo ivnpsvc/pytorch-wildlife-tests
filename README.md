@@ -113,6 +113,11 @@ dataset on LILA BC, published under the
 Citation: Sara Beery, Grant Van Horn, Pietro Perona. Recognition in Terra Incognita. ECCV 2018.
 See [images/README.md](images/README.md) and [tests/data/README.md](tests/data/README.md).
 
+## License
+
+The test code and documentation are released under the [MIT License](LICENSE). The photos keep
+their original license (CDLA-Permissive-1.0, see "Test data" above).
+
 ## About
 
 Built by [Ivan Posavec](https://github.com/ivnpsvc), a QA engineer learning test automation, as a
