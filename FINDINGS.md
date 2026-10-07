@@ -25,7 +25,7 @@ the dependency list in `pyproject.toml` is unchanged.
 | F3 | Model weights are downloaded again on every model creation | Bug | Fix proposed in [PR #23](https://github.com/microsoft/Pytorch-Wildlife/pull/23) (open) | Still present |
 | F4 | `MegaDetectorV6()` with the default `version` raises `ValueError` | Bug | Not reported | **Fixed** |
 | F5 | `single_image_detection` crashes on a `pathlib.Path` | Bug | Not reported | Still present |
-| F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify | Still present |
+| F6 | `device` argument is ignored; detection always runs on CPU | Bug | Not reported | Still present |
 | F7 | RT-DETR version runs at the wrong image size with the wrong predictor; it misses clear animals, people and vehicles | Bug | Not reported | Still present |
 | F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported | Still present |
 | F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported | Still present |
@@ -102,15 +102,19 @@ the dependency list in `pyproject.toml` is unchanged.
 
 ## F6: `device` argument is ignored
 
-- **Category:** Bug. **Status:** To verify.
-- **Observation:** in `yolov8_base.py`, the line that would apply the device is commented out:
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** `MegaDetectorV6(version="MDV6-yolov9-c", device="mps")` still runs on the CPU.
+  After a detection, `model.predictor.device` is `cpu`, and Ultralytics prints `CPU (Apple M4)`,
+  although MPS is available. GPU users get no speed-up from passing a device.
+- **Cause:** in `yolov8_base.py`, the line that would apply the device is commented out:
 
   ```python
   # self.predictor.args.device = device # Will uncomment later
   ```
 
-  Ultralytics reports `CPU (Apple M4)` even though MPS is available.
-- **To verify:** create the model with `device="mps"` and check which device is used.
+- **On `main`:** the line is still commented out.
+- **Test:** `test_device_argument_is_used` in `test_edge_cases.py` (xfail, strict). It needs a GPU
+  (MPS or CUDA), so it is skipped on GitHub Actions, which has none.
 
 ## F7: RT-DETR version is effectively broken
 

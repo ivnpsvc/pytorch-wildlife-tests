@@ -1,4 +1,5 @@
 import pytest
+import torch
 from PIL import Image, UnidentifiedImageError
 from PytorchWildlife.models import detection as pw_detection
 
@@ -43,3 +44,25 @@ def test_truncated_photo_is_processed_without_error(detector, images_dir, tmp_pa
     truncated_photo.write_bytes(full_photo[:20000])
     result = detector.single_image_detection(str(truncated_photo))
     assert len(result["detections"]) == 0
+
+
+def accelerator():
+    if torch.backends.mps.is_available():
+        return "mps"
+    if torch.cuda.is_available():
+        return "cuda"
+    return None
+
+
+@pytest.mark.xfail(
+    raises=AssertionError,
+    strict=True,
+    reason="Known bug in 1.3.0 (F6): the device argument is ignored; runs on CPU",
+)
+def test_device_argument_is_used(images_dir):
+    device = accelerator()
+    if device is None:
+        pytest.skip("No GPU (MPS or CUDA) on this machine")
+    model = pw_detection.MegaDetectorV6(version="MDV6-yolov9-c", device=device)
+    model.single_image_detection(str(images_dir / "coyote_day.jpg"))
+    assert model.predictor.device.type == device
