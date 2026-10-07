@@ -161,6 +161,11 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
   "RGB format", but the arrays are treated as BGR.
 - **Impact:** single-image results are computed on color-swapped photos. A researcher testing one
   photo and then running a folder can get different answers for the same photo.
+- **Measured effect on accuracy** (200 labeled photos, `test_accuracy.py`, MDV6-yolov9-c, threshold
+  0.2): batch detection (correct colors) recall 0.93 and false positive rate 0.15; single detection
+  (swapped colors) recall 0.92 and false positive rate 0.13. On this sample the overall effect is
+  small; individual photos still change. Larger V6 versions showed a bigger effect on empty photos
+  (see L5).
 - **Note for this suite:** known-answer tests use single detection, so they run on swapped colors.
   `animal_small_distant_day.jpg` is only found with swapped colors.
 - **Test:** planned in `test_batch.py` (xfail, strict).
