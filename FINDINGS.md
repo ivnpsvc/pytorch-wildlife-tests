@@ -9,7 +9,7 @@ Categories:
 - **Model limitation:** the code works, but the model's answer is wrong; needs retraining, not a code fix
 - **Question:** behavior that may be intentional; needs the maintainers' view
 
-Status: **Reported** (an issue exists), **Not reported**, or **To verify** (suspected, not yet confirmed by a test).
+Status: **Reported** (an issue exists), **Fix proposed** (a pull request exists), **Not reported**, or **To verify** (suspected, not yet confirmed by a test).
 
 **On `main`:** result of running this suite against the `main` branch of microsoft/Pytorch-Wildlife
 (version 1.3.1, commit `55c5135`, checked 2026-10-07). "Fixed" means the strict xfail test for the
@@ -22,7 +22,7 @@ the dependency list in `pyproject.toml` is unchanged.
 |---|---|---|---|---|
 | F1 | Fresh install cannot be imported: `soundfile` and `librosa` not declared | Bug | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) | Still present |
 | F2 | `yolov5` dependency imports `pkg_resources`, removed in setuptools 82 | Bug (dependency) | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) | Still present |
-| F3 | Model weights are downloaded again on every model creation | Bug | Not reported | Still present |
+| F3 | Model weights are downloaded again on every model creation | Bug | Fix proposed in [PR #23](https://github.com/microsoft/Pytorch-Wildlife/pull/23) (open) | Still present |
 | F4 | `MegaDetectorV6()` with the default `version` raises `ValueError` | Bug | Not reported | **Fixed** |
 | F5 | `single_image_detection` crashes on a `pathlib.Path` | Bug | Not reported | Still present |
 | F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify | Still present |
@@ -59,7 +59,9 @@ the dependency list in `pyproject.toml` is unchanged.
 
 ## F3: Model weights are downloaded again on every model creation
 
-- **Category:** Bug. **Status:** Not reported.
+- **Category:** Bug. **Status:** fix proposed by another contributor in
+  [PR #23](https://github.com/microsoft/Pytorch-Wildlife/pull/23) ("Fix mdv6 model name", open since
+  2026-08-26, not yet reviewed). It changes both `MODEL_NAME` values to match the downloaded files.
 - **What happens:** every `MegaDetectorV6(version="MDV6-yolov9-c")` downloads the 52 MB weights again,
   and the cache folder fills with copies (`MDV6-yolov9-c.pt`, `MDV6-yolov9-c (1).pt`, ...).
 - **Cause:** `yolov8_base.py` checks the cache for `self.MODEL_NAME`, but the downloaded file is named
