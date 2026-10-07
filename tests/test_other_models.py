@@ -122,8 +122,10 @@ def test_pipeline_classifies_every_detection(classifier, detect):
     reason="Known bug in 1.3.0 (F16): ImageFolder does not accept path_head",
 )
 def test_batch_classification_of_a_folder(classifier, crop):
+    # The folder holds every crop of the coyote photo (two detections).
+    crops = list(crop.parent.glob("*.jpg"))
     results = classifier.batch_image_classification(data_path=str(crop.parent))
-    assert len(results) == 1
+    assert len(results) == len(crops)
 
 
 @pytest.mark.xfail(
