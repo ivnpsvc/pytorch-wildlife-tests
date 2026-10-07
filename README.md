@@ -12,7 +12,7 @@ animals in camera trap photos, process whole folders, and save, sort and crop th
 real camera trap photos from the Caltech Camera Traps dataset on [LILA BC](https://lila.science).
 
 - **Version under test:** PytorchWildlife 1.3.0 (PyPI), also checked against `main` (1.3.1)
-- **Tests:** 267 (188 fast tests on every push, 79 slow tests every night)
+- **Tests:** 268 (189 fast tests on every push, 79 slow tests every night)
 - **Findings:** 17 issues and 5 model limitations, documented in [FINDINGS.md](FINDINGS.md)
 
 ## What is tested

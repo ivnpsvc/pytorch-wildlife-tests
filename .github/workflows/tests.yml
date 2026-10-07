@@ -33,4 +33,4 @@ jobs:
           curl -L -o ~/.cache/torch/hub/checkpoints/MDV6b-yolov9-c.pt "https://zenodo.org/records/15398270/files/MDV6-yolov9-c.pt?download=1"
 
       - name: Run tests
-        run: pytest -v
+        run: pytest -v -rxX
