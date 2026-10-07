@@ -29,6 +29,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported |
 | F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported |
 | F14 | `overwrite=True` empties the whole output folder, including files the library did not create | Question | Not reported |
+| F15 | Array input without `img_path` gets the text `"None"` as `img_id` | Question | Not reported |
 | L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
@@ -211,6 +212,19 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Question for maintainers:** is deleting unrelated files intended? A warning in the docstring,
   or overwriting only the files being written, would be safer.
 - **Test:** `test_overwrite_true_deletes_everything_in_the_output_folder` (characterization test).
+
+## F15: Array input without `img_path` gets `"None"` as `img_id`
+
+- **Category:** Question. **Status:** Not reported.
+- **What happens:** `single_image_detection(array)` without `img_path` returns
+  `img_id == "None"`: the word None as text, not Python's `None` value.
+- **Cause:** `results_generation` builds the ID with `str(img_id).strip(id_strip)`, and
+  `str(None)` is `"None"`.
+- **Impact:** small. When several array results are saved to JSON, they all get the same ID
+  `"None"`, and later tools cannot tell the photos apart. Batch detection numbers arrays
+  `"0"`, `"1"`, ... instead.
+- **Test:** `test_array_input_without_img_path_gets_the_text_none_as_img_id`
+  (characterization test).
 
 ## L1–L4: Model limitations
 
