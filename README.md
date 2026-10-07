@@ -1,7 +1,7 @@
-# wildlife-tests
+# pytorch-wildlife-tests
 
-[![Tests](https://github.com/ivnpsvc/wildlife-tests/actions/workflows/tests.yml/badge.svg)](https://github.com/ivnpsvc/wildlife-tests/actions/workflows/tests.yml)
-[![Slow tests](https://github.com/ivnpsvc/wildlife-tests/actions/workflows/slow-tests.yml/badge.svg)](https://github.com/ivnpsvc/wildlife-tests/actions/workflows/slow-tests.yml)
+[![Tests](https://github.com/ivnpsvc/pytorch-wildlife-tests/actions/workflows/tests.yml/badge.svg)](https://github.com/ivnpsvc/pytorch-wildlife-tests/actions/workflows/tests.yml)
+[![Slow tests](https://github.com/ivnpsvc/pytorch-wildlife-tests/actions/workflows/slow-tests.yml/badge.svg)](https://github.com/ivnpsvc/pytorch-wildlife-tests/actions/workflows/slow-tests.yml)
 
 A pytest test suite for [PyTorch-Wildlife](https://github.com/microsoft/Pytorch-Wildlife),
 the open source library that runs the [MegaDetector](https://github.com/agentmorris/MegaDetector)
@@ -58,8 +58,8 @@ findings (F4 and F16) are already fixed there.
 Requirements: Python 3.13 and Git. About 1.5 GB of disk space for PyTorch and model weights.
 
 ```bash
-git clone https://github.com/ivnpsvc/wildlife-tests.git
-cd wildlife-tests
+git clone https://github.com/ivnpsvc/pytorch-wildlife-tests.git
+cd pytorch-wildlife-tests
 python3.13 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt

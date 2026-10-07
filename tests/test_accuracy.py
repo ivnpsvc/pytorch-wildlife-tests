@@ -14,7 +14,7 @@ SAMPLE_FILE = Path(__file__).parent / "data" / "accuracy_sample.csv"
 BASE_URL = (
     "https://storage.googleapis.com/public-datasets-lila/caltech-unzipped/cct_images/"
 )
-PHOTO_CACHE = Path.home() / ".cache" / "wildlife-tests" / "accuracy"
+PHOTO_CACHE = Path.home() / ".cache" / "pytorch-wildlife-tests" / "accuracy"
 REPORT_FILE = Path(__file__).parent.parent / "reports" / "accuracy.json"
 THRESHOLD = 0.2
 

@@ -2,7 +2,7 @@
 
 `accuracy_sample.csv` lists 200 photos from the Caltech Camera Traps dataset on LILA BC:
 100 photos with an animal and 100 empty photos. `tests/test_accuracy.py` downloads them at test
-time into `~/.cache/wildlife-tests/accuracy`; they are not stored in this repository.
+time into `~/.cache/pytorch-wildlife-tests/accuracy`; they are not stored in this repository.
 
 - Dataset: https://lila.science/datasets/caltech-camera-traps
 - License: Community Data License Agreement - Permissive, Version 1.0

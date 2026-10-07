@@ -33,7 +33,7 @@ jobs:
         # About 80 MB of LILA photos listed in tests/data/accuracy_sample.csv.
         uses: actions/cache@v6
         with:
-          path: ~/.cache/wildlife-tests/accuracy
+          path: ~/.cache/pytorch-wildlife-tests/accuracy
           key: accuracy-photos-${{ hashFiles('tests/data/accuracy_sample.csv') }}
 
       - name: Download default model weights
