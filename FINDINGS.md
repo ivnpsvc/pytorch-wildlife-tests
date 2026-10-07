@@ -21,7 +21,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F4 | `MegaDetectorV6()` with the default `version` raises `ValueError` | Bug | Not reported |
 | F5 | `single_image_detection` crashes on a `pathlib.Path` | Bug | Not reported |
 | F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify |
-| F7 | RT-DETR version may use the wrong predictor | Bug | To verify |
+| F7 | RT-DETR version runs at the wrong image size with the wrong predictor; it misses clear animals, people and vehicles | Bug | Not reported |
 | F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported |
 | F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported |
 | F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported |
@@ -30,7 +30,9 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 | F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported |
 | F14 | `overwrite=True` empties the whole output folder, including files the library did not create | Question | Not reported |
 | F15 | Array input without `img_path` gets the text `"None"` as `img_id` | Question | Not reported |
-| L1–L4 | Missed or false detections on hard photos | Model limitation | Not reported |
+| F16 | `batch_image_classification(data_path=...)` always raises `TypeError` | Bug | Not reported |
+| F17 | Classifiers crash on grayscale images | Bug | Not reported |
+| L1–L5 | Missed or false detections on hard photos | Model limitation | Not reported |
 
 ## F1: Fresh install cannot be imported
 
@@ -102,13 +104,23 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
   Ultralytics reports `CPU (Apple M4)` even though MPS is available.
 - **To verify:** create the model with `device="mps"` and check which device is used.
 
-## F7: RT-DETR version may use the wrong predictor
+## F7: RT-DETR version is effectively broken
 
-- **Category:** Bug. **Status:** To verify.
-- **Observation:** `yolov8_base.py` selects the RT-DETR predictor only when
-  `self.MODEL_NAME == 'MDV6b-rtdetrl.pt'`, but `MDV6-rtdetr-c` sets `MODEL_NAME = "MDV6b-rtdetr-c.pt"`.
-  The YOLO predictor is used instead.
-- **To verify:** run `MDV6-rtdetr-c` on the known-answer photos (planned in P3, other models).
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** `MegaDetectorV6(version="MDV6-rtdetr-c")` loads, but misses clear photos at
+  threshold 0.2: no detection on `coyote_day.jpg`, `person_day.jpg`, `vehicle_car_day.jpg` or
+  `animal_mountain_lion_night.jpg`, and many low-confidence boxes elsewhere.
+- **Causes (two):**
+  1. `megadetectorv6.py` sets `IMAGE_SIZE = 1280` for every V6 version, but the RT-DETR checkpoint
+     was trained at 640 px (`train_args["imgsz"] == 640` in the weights file).
+  2. `yolov8_base.py` selects the RT-DETR predictor only when
+     `self.MODEL_NAME == 'MDV6b-rtdetrl.pt'`, but this version sets `MODEL_NAME = "MDV6b-rtdetr-c.pt"`,
+     so the YOLO predictor is used instead.
+- **Evidence:** the same weights loaded directly with Ultralytics (`RTDETR(weights)`) at 640 px find
+  the coyote (0.98), the person (0.95) and the car (0.96). At 1280 px, Ultralytics gives the same
+  poor results as PytorchWildlife.
+- **Also:** the weights are downloaded again on every model creation (same name mismatch as F3).
+- **Test:** `test_rtdetr_detects_a_clear_animal` in `test_other_models.py` (xfail, strict, slow).
 
 ## F8: Truncated photos are silently processed
 
@@ -226,7 +238,28 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Test:** `test_array_input_without_img_path_gets_the_text_none_as_img_id`
   (characterization test).
 
-## L1–L4: Model limitations
+## F16: Batch classification of a folder always fails
+
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** `batch_image_classification(data_path=folder)` raises
+  `TypeError: ImageFolder.__init__() got an unexpected keyword argument 'path_head'`, for every
+  ResNet classifier (Serengeti, Amazon, Opossum).
+- **Cause:** `resnet_base/base_classifier.py` creates `pw_data.ImageFolder(data_path,
+  transform=..., path_head='.')`, but `ImageFolder.__init__` only accepts `image_dir` and `transform`.
+- **Works:** `batch_image_classification(det_results=...)` (classifying detection crops).
+- **Test:** `test_batch_classification_of_a_folder` (xfail, strict, slow).
+
+## F17: Classifiers crash on grayscale images
+
+- **Category:** Bug. **Status:** Not reported.
+- **What happens:** `single_image_classification` on a grayscale JPEG raises
+  `RuntimeError: output with shape [1, 224, 224] doesn't match the broadcast shape [3, 224, 224]`.
+- **Cause:** the image is opened with `Image.open(img)` but not converted with `.convert("RGB")`,
+  unlike in detection. The normalization step expects three color channels.
+- **Impact:** some cameras save night photos as true grayscale files.
+- **Test:** `test_classification_of_a_grayscale_photo` (xfail, strict, slow).
+
+## L1–L5: Model limitations
 
 The code works in these cases; the model's answer is wrong. Possibly useful as examples for future
 training. All at threshold 0.2 with `MDV6-yolov9-c`. Tests: `test_hard_cases.py` (xfail, strict).
@@ -237,6 +270,12 @@ training. All at threshold 0.2 with `MDV6-yolov9-c`. Tests: `test_hard_cases.py`
 | L2 | `animal_too_close_blurry.jpg` (animal fills the frame) | Animal | Best confidence 0.14, below threshold |
 | L3 | `person_and_dog_day.jpg` (only a person's legs visible) | Person and animal | Animal only |
 | L4 | `empty_branch_across_lens.jpg` (branch and rock, no animal) | Nothing | Animal, confidence 0.65 |
+
+| L5 | `empty_hillside_day.jpg` (no animal or vehicle) with the larger V6 versions | Nothing | Vehicle: 0.64 with `MDV6-yolov10-e`, 0.40 with `MDV6-yolov9-e` |
+
+L5 also appears with correct colors (BGR input), so it is not caused by F9. Other false detections
+of the larger V6 versions on empty photos disappear with correct colors, which suggests F9 affects
+accuracy, not only consistency. MegaDetector V5 finds nothing in any of the empty photos.
 
 Related observation: `vehicle_car_day.jpg` is detected as a vehicle with only 0.22 confidence,
 just above the 0.2 threshold. The test uses threshold 0.1 to avoid a flaky result.
