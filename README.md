@@ -32,8 +32,6 @@ real camera trap photos from the Caltech Camera Traps dataset on [LILA BC](https
 | Other MegaDetector versions and species classifiers (slow) | `tests/test_other_models.py` |
 | Recall and false positive rate on 200 labeled photos (slow) | `tests/test_accuracy.py` |
 
-The full scope, priorities and test design rules are in [TEST_PLAN.md](TEST_PLAN.md).
-
 ## Findings
 
 Testing found bugs and open questions in the library, for example:
@@ -101,7 +99,7 @@ tests/                the test suite
 tests/conftest.py     shared fixtures: the detector, the images folder, cached detections
 tests/constants.py    MegaDetector class IDs
 tests/data/           the accuracy sample (photo list only; photos are downloaded at test time)
-TEST_PLAN.md          scope, priorities and test design rules
+examples/             a script that runs MegaDetector on the photos (from the project root: python examples/detect_one.py)
 FINDINGS.md           issues found, with evidence
 ```
 

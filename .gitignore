@@ -7,3 +7,4 @@ __pycache__/
 htmlcov/
 reports/
 drafts/
+TEST_PLAN.md
