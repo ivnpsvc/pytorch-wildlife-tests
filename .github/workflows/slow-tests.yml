@@ -29,6 +29,13 @@ jobs:
           path: ~/.cache/torch/hub/checkpoints
           key: model-weights-pytorchwildlife-1.3.0
 
+      - name: Cache accuracy sample photos
+        # About 80 MB of LILA photos listed in tests/data/accuracy_sample.csv.
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/wildlife-tests/accuracy
+          key: accuracy-photos-${{ hashFiles('tests/data/accuracy_sample.csv') }}
+
       - name: Download default model weights
         # Same workaround as in tests.yml (finding F3).
         run: |
@@ -37,3 +44,12 @@ jobs:
 
       - name: Run slow tests
         run: pytest -m slow -v -rxXs
+
+      - name: Upload accuracy report
+        # Recall, false positive rate, and the lists of missed and falsely flagged photos.
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accuracy-report
+          path: reports/accuracy.json
+          if-no-files-found: warn
