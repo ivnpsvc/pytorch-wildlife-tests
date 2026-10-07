@@ -120,6 +120,7 @@ their original license (CDLA-Permissive-1.0, see "Test data" above).
 
 ## About
 
-Built by [Ivan Posavec](https://github.com/ivnpsvc), a QA engineer learning test automation, as a
-first step toward contributing to open source conservation technology. Not affiliated with
-Microsoft or the PyTorch-Wildlife team.
+Built by [Ivan Posavec](https://github.com/ivnpsvc). Camera traps help researchers monitor
+wildlife at a scale no person could, and the software behind them should be reliable. This project
+tests that software and reports what it finds. Not affiliated with Microsoft or the
+PyTorch-Wildlife team.
