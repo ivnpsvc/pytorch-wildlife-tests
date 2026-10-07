@@ -11,28 +11,33 @@ Categories:
 
 Status: **Reported** (an issue exists), **Not reported**, or **To verify** (suspected, not yet confirmed by a test).
 
+**On `main`:** result of running this suite against the `main` branch of microsoft/Pytorch-Wildlife
+(version 1.3.1, commit `55c5135`, checked 2026-10-07). "Fixed" means the strict xfail test for the
+finding unexpectedly passed there. "Still present" means the test result is unchanged; for F1 and F2,
+the dependency list in `pyproject.toml` is unchanged.
+
 ## Summary
 
-| ID | Finding | Category | Status |
-|---|---|---|---|
-| F1 | Fresh install cannot be imported: `soundfile` and `librosa` not declared | Bug | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) |
-| F2 | `yolov5` dependency imports `pkg_resources`, removed in setuptools 82 | Bug (dependency) | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) |
-| F3 | Model weights are downloaded again on every model creation | Bug | Not reported |
-| F4 | `MegaDetectorV6()` with the default `version` raises `ValueError` | Bug | Not reported |
-| F5 | `single_image_detection` crashes on a `pathlib.Path` | Bug | Not reported |
-| F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify |
-| F7 | RT-DETR version runs at the wrong image size with the wrong predictor; it misses clear animals, people and vehicles | Bug | Not reported |
-| F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported |
-| F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported |
-| F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported |
-| F11 | `detection_folder_separation` fails with `SameFileError` on JSON with absolute paths (the default) | Bug | Not reported |
-| F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported |
-| F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported |
-| F14 | `overwrite=True` empties the whole output folder, including files the library did not create | Question | Not reported |
-| F15 | Array input without `img_path` gets the text `"None"` as `img_id` | Question | Not reported |
-| F16 | `batch_image_classification(data_path=...)` always raises `TypeError` | Bug | Not reported |
-| F17 | Classifiers crash on grayscale images | Bug | Not reported |
-| L1–L5 | Missed or false detections on hard photos | Model limitation | Not reported |
+| ID | Finding | Category | Status | On `main` |
+|---|---|---|---|---|
+| F1 | Fresh install cannot be imported: `soundfile` and `librosa` not declared | Bug | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) | Still present |
+| F2 | `yolov5` dependency imports `pkg_resources`, removed in setuptools 82 | Bug (dependency) | Reported ([#26](https://github.com/microsoft/Pytorch-Wildlife/issues/26)) | Still present |
+| F3 | Model weights are downloaded again on every model creation | Bug | Not reported | Still present |
+| F4 | `MegaDetectorV6()` with the default `version` raises `ValueError` | Bug | Not reported | **Fixed** |
+| F5 | `single_image_detection` crashes on a `pathlib.Path` | Bug | Not reported | Still present |
+| F6 | `device` argument is ignored; detection always runs on CPU | Bug | To verify | Still present |
+| F7 | RT-DETR version runs at the wrong image size with the wrong predictor; it misses clear animals, people and vehicles | Bug | Not reported | Still present |
+| F8 | Truncated photos are silently processed; the animal is lost | Question | Not reported | Still present |
+| F9 | Single-image detection passes RGB where Ultralytics expects BGR; results differ from batch detection | Bug | Not reported | Still present |
+| F10 | One non-image `.jpg` in a folder stops the whole batch | Question | Not reported | Still present |
+| F11 | `detection_folder_separation` fails with `SameFileError` on JSON with absolute paths (the default) | Bug | Not reported | Still present |
+| F12 | Timelapse JSON writes `max_detection_conf` as an empty string for photos without detections | Question | Not reported | Still present |
+| F13 | Folder separation drops animals with confidence exactly at the threshold; detection keeps them | Question | Not reported | Still present |
+| F14 | `overwrite=True` empties the whole output folder, including files the library did not create | Question | Not reported | Still present |
+| F15 | Array input without `img_path` gets the text `"None"` as `img_id` | Question | Not reported | Still present |
+| F16 | `batch_image_classification(data_path=...)` always raises `TypeError` | Bug | Not reported | **Fixed** |
+| F17 | Classifiers crash on grayscale images | Bug | Not reported | Still present |
+| L1–L5 | Missed or false detections on hard photos | Model limitation | Not reported | Not checked |
 
 ## F1: Fresh install cannot be imported
 
@@ -80,6 +85,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **What happens:** `MegaDetectorV6()` raises
   `ValueError: Select a valid model version: MDV6-yolov9-c, MDV6-yolov9-e, ...`.
 - **Cause:** the default is `version='yolov9c'`, which is not in the list of accepted versions.
+- **On `main`:** fixed; the default is `'MDV6-yolov9-c'`.
 - **Test:** `test_model_can_be_created_with_default_version` (xfail, strict).
 
 ## F5: `single_image_detection` crashes on a `pathlib.Path`
@@ -252,6 +258,7 @@ Status: **Reported** (an issue exists), **Not reported**, or **To verify** (susp
 - **Cause:** `resnet_base/base_classifier.py` creates `pw_data.ImageFolder(data_path,
   transform=..., path_head='.')`, but `ImageFolder.__init__` only accepts `image_dir` and `transform`.
 - **Works:** `batch_image_classification(det_results=...)` (classifying detection crops).
+- **On `main`:** fixed; it uses `ClassificationImageFolder` without `path_head`.
 - **Test:** `test_batch_classification_of_a_folder` (xfail, strict, slow).
 
 ## F17: Classifiers crash on grayscale images
@@ -270,7 +277,7 @@ The code works in these cases; the model's answer is wrong. Possibly useful as e
 training. All at threshold 0.2 with `MDV6-yolov9-c`. Tests: `test_hard_cases.py` (xfail, strict).
 
 | ID | Photo | Expected | Actual |
-|---|---|---|---|
+|---|---|---|---|---|
 | L1 | `animal_upside_down_camera.jpg` (camera mounted upside down) | Animal (bird) | No detections |
 | L2 | `animal_too_close_blurry.jpg` (animal fills the frame) | Animal | Best confidence 0.14, below threshold |
 | L3 | `person_and_dog_day.jpg` (only a person's legs visible) | Person and animal | Animal only |
